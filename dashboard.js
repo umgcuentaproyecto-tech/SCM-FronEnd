@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   const pagoProveedorSelect = document.getElementById('pagoProveedor');
   if (pagoOrdenSelect) pagoOrdenSelect.addEventListener('change', onPagoOrdenChange);
   if (pagoProveedorSelect) pagoProveedorSelect.addEventListener('change', onPagoProveedorChange);
+  actualizarBloqueoCamposPago();
 
   if (usuarioActual) {
     document.getElementById('usuarioNombre').textContent = usuarioActual.nombre;
@@ -1973,15 +1974,13 @@ function actualizarBloqueoCamposPago() {
   const pagoOrdenSelect = document.getElementById('pagoOrden');
   const pagoProveedorSelect = document.getElementById('pagoProveedor');
   const montoInput = document.getElementById('monto_pagado');
-  const ordenId = pagoOrdenSelect?.value;
-  const bloqueado = Boolean(ordenId);
-
+  // Mantener siempre bloqueados el select de proveedor y el campo monto.
   if (pagoProveedorSelect) {
-    pagoProveedorSelect.disabled = bloqueado;
+    pagoProveedorSelect.disabled = true;
   }
   if (montoInput) {
-    montoInput.readOnly = bloqueado;
-    montoInput.classList.toggle('bg-light', bloqueado);
+    montoInput.readOnly = true;
+    montoInput.classList.add('bg-light');
   }
 }
 
