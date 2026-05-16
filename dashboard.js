@@ -90,9 +90,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Mapeo de rol -> módulos permitidos (ids de pestañas / targets)
     const accessMap = {
       'Administrador': 'all',
-      'Compras': ['compras'],
+      'Compras_Suministros': ['compras', 'suministros'],
       'Bodega': ['inventarios'],
-      'Transporte': ['transportes'],
+      'Transporte_Almacenes': ['transportes', 'almacenes'],
       'Finanzas': ['finanzas'],
       'Pedidos': ['pedidos']
     };
