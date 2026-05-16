@@ -87,19 +87,25 @@ document.addEventListener('DOMContentLoaded', async function() {
     // roleIdentifier puede ser nombre ('Administrador') o id
     const roleName = typeof roleIdentifier === 'string' ? roleIdentifier : null;
 
+    const normalizeRole = (name) => {
+      if (!name) return null;
+      return String(name).trim().toLowerCase().replace(/\s+/g, '_');
+    };
+
     // Mapeo de rol -> módulos permitidos (ids de pestañas / targets)
     const accessMap = {
-      'Administrador': 'all',
-      'Compras_Suministros': ['compras', 'suministros'],
-      'Bodega': ['inventarios'],
-      'Transporte_Almacenes': ['transportes', 'almacenes'],
-      'Finanzas': ['finanzas'],
-      'Pedidos': ['pedidos']
+      'administrador': 'all',
+      'compras_suministros': ['compras', 'suministros'],
+      'bodega': ['inventarios'],
+      'transporte_almacenes': ['transportes', 'almacenes'],
+      'finanzas': ['finanzas'],
+      'pedidos': ['pedidos']
     };
 
     // Determinar permisos
     let allowed = 'all';
-    if (roleName && accessMap[roleName]) allowed = accessMap[roleName];
+    const normalizedRole = normalizeRole(roleName);
+    if (normalizedRole && accessMap[normalizedRole]) allowed = accessMap[normalizedRole];
 
     const navLinks = document.querySelectorAll('#modulosTabs .nav-link');
     navLinks.forEach(link => {
