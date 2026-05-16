@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Sistema SCM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard-page">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <img src="logo scm.png" class="nav-logo" alt="Sistema SCM">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <span class="nav-link" id="usuarioNombre"></span>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" id="logoutBtn">Cerrar Sesión</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido Principal -->
+  <div class="container-fluid dashboard-shell mt-4 px-4">
+    <div class="dashboard-hero mb-4">
+      <div>
+        <div class="dashboard-kicker">Operación en tiempo real</div>
+        <h1 class="dashboard-title mb-2">Bienvenido al Sistema SCM</h1>
+        <p class="dashboard-subtitle mb-0">Sistema de Gestión de Inventario, Compras, Transporte y Finanzas.</p>
+      </div>
+    </div>
+
+    <!-- Tabs de Módulos -->
+    <ul class="nav nav-tabs mb-4" id="modulosTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="inicio-tab" data-bs-toggle="tab" data-bs-target="#inicio" type="button" role="tab">
+          Inicio
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="inventarios-tab" data-bs-toggle="tab" data-bs-target="#inventarios" type="button" role="tab">
+          Inventarios
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="compras-tab" data-bs-toggle="tab" data-bs-target="#compras" type="button" role="tab">
+          Compras
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="suministros-tab" data-bs-toggle="tab" data-bs-target="#suministros" type="button" role="tab">
+          Suministros
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pedidos-tab" data-bs-toggle="tab" data-bs-target="#pedidos" type="button" role="tab">
+          Pedidos
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="almacenes-tab" data-bs-toggle="tab" data-bs-target="#almacenes" type="button" role="tab">
+          Almacenes
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="transportes-tab" data-bs-toggle="tab" data-bs-target="#transportes" type="button" role="tab">
+          Transportes
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="finanzas-tab" data-bs-toggle="tab" data-bs-target="#finanzas" type="button" role="tab">
+          Costos y Finanzas
+        </button>
+      </li>
+      <li class="nav-item" role="presentation" id="adminTabContainer" style="display: none;">
+        <button class="nav-link" id="administracion-tab" data-bs-toggle="tab" data-bs-target="#administracion" type="button" role="tab">
+          Administración
+        </button>
+      </li>
+    </ul>
+
+    <!-- Contenido de Tabs -->
+    <div class="tab-content" id="modulosTabContent">
+      <!-- Inicio -->
+      <div class="tab-pane fade show active" id="inicio" role="tabpanel">
+        <div id="usuarioInfo"></div>
+      </div>
+
+      <!-- Inventarios -->
+      <div class="tab-pane fade" id="inventarios" role="tabpanel">
+        <div class="row g-4">
+          <div class="col-xl-5">
+            <div class="card mb-4">
+              <div class="card-header">Nuevo Producto</div>
+              <div class="card-body">
+                <form id="formProducto">
+                  <div class="row g-3">
+                    <div class="col-12"><input type="text" id="codigo_producto" class="form-control" placeholder="Código producto"></div>
+                    <div class="col-12"><input type="text" id="nombre_producto" class="form-control" placeholder="Nombre producto" required></div>
+                    <div class="col-12"><input type="text" id="descripcion" class="form-control" placeholder="Descripción"></div>
+                    <div class="col-md-6">
+                      <select id="id_categoria" class="form-control">
+                        <option value="">Seleccionar categoría...</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <select id="id_proveedor" class="form-control">
+                        <option value="">Seleccionar proveedor...</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <select id="unidad_medida" class="form-control">
+                        <option value="">Seleccionar unidad...</option>
+                        <option value="mg">mg</option>
+                        <option value="g">g</option>
+                        <option value="kg">kg</option>
+                        <option value="ml">ml</option>
+                        <option value="l">l</option>
+                        <option value="unidad">unidad</option>
+                        <option value="paquete">paquete</option>
+                        <option value="caja">caja</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6"><input type="number" id="precio_compra" class="form-control" placeholder="Precio compra" step="0.01"></div>
+                    <div class="col-md-6"><input type="number" id="precio_venta" class="form-control" placeholder="Precio venta" step="0.01"></div>
+                    <div class="col-md-6"><input type="number" id="stock_minimo" class="form-control" placeholder="Stock mínimo"></div>
+                    <div class="col-md-6"><input type="number" id="stock_maximo" class="form-control" placeholder="Stock máximo"></div>
+                  </div>
+                  <button type="submit" class="btn btn-primary mt-4" id="btnGuardarProducto">Guardar Producto</button>
+                  <button type="button" class="btn btn-secondary mt-4 d-none" id="btnCancelarProducto">Cancelar</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-7">
+            <div class="card mb-4">
+              <div class="card-header">Lista de Productos</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Venta</th>
+                        <th>Stock</th>
+                        <th>Proveedor</th>
+                        <th>Categoría</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaProductos">
+                      <tr><td colspan="7" class="text-center text-muted">Cargando productos...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-xl-5">
+            <div class="card mb-4">
+              <div class="card-header">Gestionar Inventario</div>
+              <div class="card-body">
+                <form id="formInventario">
+                  <div class="mb-3">
+                    <label class="form-label">Producto</label>
+                    <select id="inv_id_producto" class="form-control"></select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Almacén</label>
+                    <select id="inv_id_almacen" class="form-control">
+                      <option value="">Seleccionar almacén...</option>
+                    </select>
+                    <div id="inventarioAlmacenError" class="alert alert-warning d-none mt-2" role="alert"></div>
+                  </div>
+                  <div class="mb-3"><input type="number" id="inv_stock_actual" class="form-control" placeholder="Stock actual"></div>
+                  <div class="mb-3"><input type="text" id="inv_ubicacion" class="form-control" placeholder="Ubicación"></div>
+                  <button type="submit" class="btn btn-primary" id="btnGuardarInventario">Guardar Inventario</button>
+                  <button type="button" class="btn btn-secondary d-none" id="btnCancelarInventario">Cancelar</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-7">
+            <div class="card mb-4">
+              <div class="card-header">Registros de Inventario</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Almacén</th>
+                        <th>Stock</th>
+                        <th>Ubicación</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaInventarios">
+                      <tr><td colspan="6" class="text-center text-muted">Cargando inventario...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-xl-5">
+            <div class="card mb-4">
+              <div class="card-header">Categorías</div>
+              <div class="card-body">
+                <form id="formCategoria">
+                  <div class="mb-3"><input type="text" id="nombre_categoria" class="form-control" placeholder="Nombre categoría" required></div>
+                  <div class="mb-3"><textarea id="descripcion_categoria" class="form-control" placeholder="Descripción" rows="3"></textarea></div>
+                  <button type="submit" class="btn btn-primary" id="btnGuardarCategoria">Guardar Categoría</button>
+                  <button type="button" class="btn btn-secondary d-none" id="btnCancelarCategoria">Cancelar</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-7">
+            <div class="card mb-4">
+              <div class="card-header">Categorías Guardadas</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaCategorias">
+                      <tr><td colspan="4" class="text-center text-muted">Cargando categorías...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compras -->
+      <div class="tab-pane fade" id="compras" role="tabpanel">
+        <h4>Módulo de Compras</h4>
+
+        <div class="row g-4 mt-2">
+          <div class="col-lg-5">
+            <div class="card mb-4">
+              <div class="card-header">Registrar Compra</div>
+              <div class="card-body">
+                <form id="formCompra">
+                  <div class="mb-3">
+                    <label for="compraProducto" class="form-label">Producto</label>
+                    <input type="text" class="form-control" id="compraProducto" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="compraCantidad" class="form-label">Cantidad</label>
+                    <input type="number" class="form-control" id="compraCantidad" min="1" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="compraTotal" class="form-label">Total</label>
+                    <input type="number" class="form-control" id="compraTotal" step="0.01" min="0" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="compraFecha" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="compraFecha">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Guardar Compra</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">Nueva Orden de Compra</div>
+              <div class="card-body">
+                <form id="formOrden">
+                  <div class="mb-3">
+                    <label for="ordenIdProveedor" class="form-label">Proveedor</label>
+                    <select id="ordenIdProveedor" class="form-select" required>
+                      <option value="">Seleccionar proveedor...</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="ordenFecha" class="form-label">Fecha</label>
+                    <input type="date" class="form-control" id="ordenFecha">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Líneas de Orden</label>
+                    <div class="input-group mb-2">
+                      <select id="ordenProducto" class="form-select">
+                        <option value="">Seleccionar producto...</option>
+                      </select>
+                      <input type="number" id="ordenCantidad" class="form-control" placeholder="Cantidad" min="1">
+                      <input type="number" id="ordenPrecio" class="form-control" placeholder="Precio unitario" step="0.01">
+                      <button type="button" class="btn btn-secondary" id="btnAgregarLineaOrden">Agregar</button>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>Acción</th></tr></thead>
+                        <tbody id="ordenLineasTable"><tr><td colspan="5" class="text-center text-muted">No hay líneas</td></tr></tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="ordenTotal" class="form-label">Total</label>
+                    <input type="number" class="form-control" id="ordenTotal" step="0.01" min="0" readonly required>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Guardar Orden</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="card mb-4">
+              <div class="card-header">Compras Registradas</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="comprasTable">
+                      <tr><td colspan="6" class="text-center text-muted">Cargando compras...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">Órdenes de Compra</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Proveedor</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ordenesTable">
+                      <tr><td colspan="5" class="text-center text-muted">Cargando órdenes...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suministros -->
+      <div class="tab-pane fade" id="suministros" role="tabpanel">
+        <h4>Módulo de Suministros</h4>
+
+        <div class="row g-4 mt-2">
+          <div class="col-lg-5">
+            <div class="card mb-4">
+              <div class="card-header">Registrar Proveedor</div>
+              <div class="card-body">
+                <form id="formProveedor">
+                  <input type="hidden" id="proveedorId">
+                  <div class="mb-3">
+                    <label for="nombreProveedor" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombreProveedor" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="telefonoProveedor" class="form-label">Teléfono</label>
+                    <input type="tel" inputmode="numeric" pattern="[0-9]+" class="form-control" id="telefonoProveedor">
+                  </div>
+                  <div class="mb-3">
+                    <label for="correoProveedor" class="form-label">Correo</label>
+                    <input type="email" class="form-control" id="correoProveedor">
+                  </div>
+                  <div class="mb-3">
+                    <label for="direccionProveedor" class="form-label">Dirección</label>
+                    <input type="text" class="form-control" id="direccionProveedor">
+                  </div>
+                  <button type="submit" class="btn btn-primary" id="btnGuardarProveedor">Guardar Proveedor</button>
+                  <button type="button" class="btn btn-secondary d-none" id="btnCancelarProveedor">Cancelar</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">Registrar Recepción</div>
+              <div class="card-body">
+                <form id="formRecepcion">
+                  <div class="mb-3">
+                    <label for="recepcionOrdenId" class="form-label">ID Orden</label>
+                    <input type="number" class="form-control" id="recepcionOrdenId" min="1" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="recepcionFecha" class="form-label">Fecha de Recepción</label>
+                    <input type="date" class="form-control" id="recepcionFecha">
+                  </div>
+                  <div class="mb-3">
+                    <label for="recepcionAlmacen" class="form-label">Almacén destino</label>
+                    <select id="recepcionAlmacen" class="form-select">
+                      <option value="">Seleccionar almacén...</option>
+                    </select>
+                    <div id="recepcionAlmacenError" class="alert alert-warning d-none mt-2" role="alert"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="recepcionEstado" class="form-label">Estado</label>
+                      <select class="form-select" id="recepcionEstado">
+                        <option value="pendiente">Pendiente</option>
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary" id="btnGuardarRecepcion">Guardar Recepción</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="card mb-4">
+              <div class="card-header">Proveedores</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Dirección</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaProveedores">
+                      <tr><td colspan="6" class="text-center text-muted">Cargando proveedores...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">Recepciones</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Orden</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recepcionesTable">
+                      <tr><td colspan="5" class="text-center text-muted">Cargando recepciones...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pedidos -->
+      <div class="tab-pane fade" id="pedidos" role="tabpanel">
+        <h4>Módulo de Pedidos</h4>
+
+        <div class="row mt-4">
+          <div class="col-lg-6">
+            <div class="card mb-4">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Clientes</span>
+                <button class="btn btn-sm btn-primary" id="btnNuevoCliente">+ Nuevo Cliente</button>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="clientesTable">
+                      <tr><td colspan="6" class="text-center text-muted">Cargando clientes...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card mb-4">
+              <div class="card-header" id="pedidoFormTitle">Crear Pedido</div>
+              <div class="card-body">
+                <form id="pedidoForm">
+                  <input type="hidden" id="pedidoId">
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="pedidoCliente" class="form-label">Cliente</label>
+                      <select id="pedidoCliente" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="pedidoEstado" class="form-label">Estado</label>
+                      <select id="pedidoEstado" class="form-select">
+                        <option value="pendiente">Pendiente</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="pedidoProducto" class="form-label">Producto</label>
+                      <select id="pedidoProducto" class="form-select"></select>
+                    </div>
+                    <div class="col-md-3">
+                      <label for="pedidoCantidad" class="form-label">Cantidad</label>
+                      <input type="number" id="pedidoCantidad" class="form-control" min="1" value="1">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                      <button type="button" class="btn btn-secondary w-100" id="btnAgregarItem">Agregar</button>
+                    </div>
+                  </div>
+
+                  <div class="table-responsive mb-3">
+                    <table class="table table-sm table-bordered">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Producto</th>
+                          <th>Cantidad</th>
+                          <th>Precio</th>
+                          <th>Total</th>
+                          <th>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody id="pedidoItemsTable">
+                        <tr><td colspan="5" class="text-center text-muted">Agrega productos al pedido</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <strong>Total del pedido:</strong>
+                    <span id="pedidoTotal">Q0.00</span>
+                  </div>
+
+                  <div id="pedidoError" class="alert alert-danger d-none"></div>
+                  <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success" id="btnCrearPedido">Crear Pedido</button>
+                    <button type="button" class="btn btn-secondary d-none" id="btnCancelarPedido">Cancelar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="card mb-4">
+              <div class="card-header">Inventario</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                        <th>Precio</th>
+                      </tr>
+                    </thead>
+                    <tbody id="productosTable">
+                      <tr><td colspan="4" class="text-center text-muted">Cargando inventario...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="card mb-4">
+              <div class="card-header">Pedidos</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped mb-0">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="pedidosTable">
+                      <tr><td colspan="5" class="text-center text-muted">Cargando pedidos...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Almacenes -->
+      <div class="tab-pane fade" id="almacenes" role="tabpanel">
+        <h4>Módulo de Almacenes</h4>
+
+        <div class="row g-4">
+          <div class="col-12 col-lg-5">
+            <div class="card shadow-sm">
+              <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <span id="almacenFormTitle">Nuevo Almacén</span>
+                <small class="opacity-75">Todos los campos principales</small>
+              </div>
+              <div class="card-body">
+                <form id="formAlmacen">
+                  <input type="hidden" id="almacenId">
+
+                  <div class="mb-3">
+                    <label for="nombre_almacen" class="form-label">Nombre del almacén</label>
+                    <input type="text" class="form-control" id="nombre_almacen" required maxlength="100">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="direccion_almacen" class="form-label">Dirección</label>
+                    <textarea class="form-control" id="direccion_almacen" rows="2" maxlength="255"></textarea>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="encargado_almacen" class="form-label">Encargado</label>
+                    <input type="text" class="form-control" id="encargado_almacen" maxlength="100">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="telefono_almacen" class="form-label">Teléfono</label>
+                    <input type="tel" inputmode="numeric" pattern="[0-9]+" class="form-control" id="telefono_almacen" maxlength="20">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="estado_almacen" class="form-label">Estado</label>
+                    <select class="form-select" id="estado_almacen">
+                      <option value="1">Activo</option>
+                      <option value="0">Inactivo</option>
+                    </select>
+                  </div>
+
+                  <div id="almacenError" class="alert alert-danger d-none"></div>
+
+                  <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary d-none" id="btnCancelarAlmacen">Cancelar</button>
+                    <button type="submit" class="btn btn-success" id="btnGuardarAlmacen">Guardar Almacén</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-7">
+            <div class="card shadow-sm">
+              <div class="card-header bg-dark text-white">Listado de Almacenes</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Encargado</th>
+                        <th>Teléfono</th>
+                        <th>Productos</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="almacenesTable">
+                      <tr><td colspan="8" class="text-center text-muted">Cargando almacenes...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transportes -->
+      <div class="tab-pane fade" id="transportes" role="tabpanel">
+        <h4>Módulo de Transportes</h4>
+
+        <div class="row g-4 mt-3 align-items-start">
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header bg-white fw-semibold">Transportistas</div>
+              <div class="card-body">
+                <div class="row g-4">
+                  <div class="col-lg-4">
+                    <form id="formTransportista">
+                      <input type="hidden" id="transportistaId">
+                      <div class="mb-2"><input type="text" id="nombre_transportista" class="form-control" placeholder="Nombre transportista" required></div>
+                      <div class="mb-2"><input type="tel" inputmode="numeric" pattern="[0-9]+" id="telefono_transportista" class="form-control" placeholder="Teléfono"></div>
+                      <div class="mb-2"><input type="email" id="correo_transportista" class="form-control" placeholder="Correo"></div>
+                      <div class="mb-2"><select id="tipo_transportista" class="form-control"><option value="EXTERNO">EXTERNO</option><option value="INTERNO">INTERNO</option></select></div>
+                      <button class="btn btn-primary w-100">Guardar Transportista</button>
+                    </form>
+                  </div>
+                  <div class="col-lg-8">
+                    <div class="table-responsive">
+                      <table class="table table-striped mb-0 align-middle">
+                        <thead class="table-dark"><tr><th>ID</th><th>Nombre</th><th>Tel</th><th>Correo</th><th>Acciones</th></tr></thead>
+                        <tbody id="transportistasTable"><tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header bg-white fw-semibold">Vehículos</div>
+              <div class="card-body">
+                <div class="row g-4">
+                  <div class="col-lg-4">
+                    <form id="formVehiculo">
+                      <input type="hidden" id="vehiculoId">
+                      <div class="mb-2"><input type="text" id="placa" class="form-control" placeholder="Placa" required></div>
+                      <div class="mb-2"><input type="text" id="marca" class="form-control" placeholder="Marca"></div>
+                      <div class="mb-2"><input type="text" id="modelo" class="form-control" placeholder="Modelo"></div>
+                      <div class="mb-2"><input type="number" id="capacidad_carga" class="form-control" placeholder="Capacidad de carga (kg)"></div>
+                      <div class="mb-2"><select id="vehiculo_transportista" class="form-control"><option value="">Seleccionar transportista...</option></select></div>
+                      <button class="btn btn-primary w-100">Guardar Vehículo</button>
+                    </form>
+                  </div>
+                  <div class="col-lg-8">
+                    <div class="table-responsive">
+                      <table class="table table-striped mb-0 align-middle">
+                        <thead class="table-dark"><tr><th>ID</th><th>Placa</th><th>Marca</th><th>Transportista</th><th>Acciones</th></tr></thead>
+                        <tbody id="vehiculosTable"><tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header bg-white fw-semibold">Rutas</div>
+              <div class="card-body">
+                <div class="row g-4">
+                  <div class="col-lg-4">
+                    <form id="formRuta">
+                      <input type="hidden" id="rutaId">
+                      <div class="mb-2"><input type="text" id="nombre_ruta" class="form-control" placeholder="Nombre ruta" required></div>
+                      <div class="mb-2"><input type="text" id="origen" class="form-control" placeholder="Origen" required></div>
+                      <div class="mb-2"><input type="text" id="destino" class="form-control" placeholder="Destino" required></div>
+                      <div class="mb-2"><input type="number" step="0.1" id="distancia_km" class="form-control" placeholder="Distancia (km)"></div>
+                      <button class="btn btn-primary w-100">Guardar Ruta</button>
+                    </form>
+                  </div>
+                  <div class="col-lg-8">
+                    <div class="table-responsive">
+                      <table class="table table-striped mb-0 align-middle">
+                        <thead class="table-dark"><tr><th>ID</th><th>Nombre</th><th>Origen</th><th>Destino</th><th>Acciones</th></tr></thead>
+                        <tbody id="rutasTable"><tr><td colspan="5" class="text-center text-muted">Cargando...</td></tr></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header bg-white fw-semibold">Envíos</div>
+              <div class="card-body">
+                <div class="row g-4">
+                  <div class="col-lg-4">
+                    <form id="formEnvio">
+                      <input type="hidden" id="envioId">
+                        <div class="mb-2"><select id="envio_pedido" class="form-control"><option value="">Seleccionar pedido...</option></select></div>
+                      <div class="mb-2"><input type="text" id="direccion_entrega" class="form-control" placeholder="Dirección entrega" required></div>
+                      <div class="mb-2"><select id="envio_transportista" class="form-control"><option value="">Transportista...</option></select></div>
+                      <div class="mb-2"><select id="envio_vehiculo" class="form-control"><option value="">Vehículo...</option></select></div>
+                      <div class="mb-2"><select id="envio_ruta" class="form-control"><option value="">Ruta...</option></select></div>
+                        <div id="envioPedidoDetalle" class="alert alert-light border small py-2">Selecciona un pedido para ver sus productos vinculados al inventario.</div>
+                      <button class="btn btn-primary w-100">Crear Envío</button>
+                    </form>
+                  </div>
+                  <div class="col-lg-8">
+                    <div class="table-responsive">
+                      <table class="table table-striped mb-0 align-middle">
+                          <thead class="table-dark"><tr><th>ID</th><th>Pedido</th><th>Dirección</th><th>Transportista</th><th>Vehículo</th><th>Ruta</th><th>Productos</th><th>Acciones</th></tr></thead>
+                          <tbody id="enviosTable"><tr><td colspan="8" class="text-center text-muted">Cargando...</td></tr></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Costos y Finanzas -->
+      <div class="tab-pane fade" id="finanzas" role="tabpanel">
+        <h4>Módulo de Costos y Finanzas</h4>
+
+        <div class="row g-3 mt-2">
+          <div class="col-md-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="text-muted small">Costos Operativos</div>
+                <div class="fs-4 fw-bold" id="totalCostos">Q0.00</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="text-muted small">Pagos a Proveedores</div>
+                <div class="fs-4 fw-bold" id="totalPagos">Q0.00</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="text-muted small">Valor Inventario</div>
+                <div class="fs-4 fw-bold" id="valorInventario">Q0.00</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="text-muted small">Margen Potencial</div>
+                <div class="fs-4 fw-bold" id="margenPotencial">Q0.00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+          <div class="col-12">
+            <div class="card mb-4">
+              <div class="card-header">Detalle de Inventario Financiero</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                        <th>Costo Unitario</th>
+                        <th>Costo Total</th>
+                        <th>Venta Unitario</th>
+                        <th>Venta Total</th>
+                        <th>Ganancia</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaInventarioFinanzas">
+                      <tr><td colspan="7" class="text-center text-muted">Cargando inventario financiero...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+          <div class="col-lg-5">
+            <div class="card mb-4">
+              <div class="card-header">Registrar Costo</div>
+              <div class="card-body">
+                <form id="formCosto">
+                  <div class="mb-3">
+                    <label for="tipo_costo" class="form-label">Tipo de costo</label>
+                    <select id="tipo_costo" class="form-select" required>
+                      <option value="">Seleccionar tipo...</option>
+                      <option value="DIRECTO">Directo</option>
+                      <option value="INDIRECTO">Indirecto</option>
+                      <option value="OPERATIVO">Operativo</option>
+                      <option value="ADMINISTRATIVO">Administrativo</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="descripcion_costo" class="form-label">Descripción</label>
+                    <textarea id="descripcion_costo" class="form-control" rows="2" required></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label for="monto_costo" class="form-label">Monto</label>
+                    <input type="number" id="monto_costo" class="form-control" min="0" step="0.01" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="costoProducto" class="form-label">Producto relacionado</label>
+                    <select id="costoProducto" class="form-select">
+                      <option value="">Sin producto específico</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Guardar Costo</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">Registrar Pago</div>
+              <div class="card-body">
+                <form id="formPago">
+                  <div class="mb-3">
+                    <label for="pagoProveedor" class="form-label">Proveedor</label>
+                    <select id="pagoProveedor" class="form-select" required>
+                      <option value="">Seleccionar proveedor...</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="pagoOrden" class="form-label">Orden de compra</label>
+                    <select id="pagoOrden" class="form-select">
+                      <option value="">Sin orden específica</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="monto_pagado" class="form-label">Monto pagado</label>
+                    <input type="number" id="monto_pagado" class="form-control" min="0" step="0.01" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="metodo_pago" class="form-label">Método de pago</label>
+                    <select id="metodo_pago" class="form-select" required>
+                      <option value="">Seleccionar método...</option>
+                      <option value="EFECTIVO">Efectivo</option>
+                      <option value="TRANSFERENCIA">Transferencia</option>
+                      <option value="TARJETA">Tarjeta</option>
+                      <option value="CHEQUE">Cheque</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="estado_pago" class="form-label">Estado</label>
+                    <select id="estado_pago" class="form-select">
+                      <option value="PENDIENTE">Pendiente</option>
+                      <option value="PAGADO">Pagado</option>
+                      <option value="ANULADO">Anulado</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Guardar Pago</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-7">
+            <div class="card mb-4">
+              <div class="card-header">Costos Registrados</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Producto</th>
+                        <th>Monto</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaCostos">
+                      <tr><td colspan="7" class="text-center text-muted">Cargando costos...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">Pagos a Proveedores</div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>ID</th>
+                        <th>Proveedor</th>
+                        <th>Orden</th>
+                        <th>Monto</th>
+                        <th>Método</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaPagos">
+                      <tr><td colspan="7" class="text-center text-muted">Cargando pagos...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Administración (Solo Administrador) -->
+      <div class="tab-pane fade" id="administracion" role="tabpanel">
+        <h4>Administración de Usuarios</h4>
+        <button class="btn btn-success mb-3" id="btnNuevoUsuario">+ Nuevo Usuario</button>
+        
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usuariosTable">
+              <tr>
+                <td colspan="6" class="text-center text-muted">Cargando usuarios...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Crear/Editar Usuario -->
+  <div class="modal fade" id="usuarioModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Nuevo Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="usuarioForm">
+            <input type="hidden" id="usuarioId">
+            
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="nombre" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="correo" class="form-label">Correo</label>
+              <input type="email" class="form-control" id="correo" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Contraseña</label>
+              <input type="password" class="form-control" id="password" id="passwordInput">
+              <small class="text-muted">Dejar vacío para no cambiar la contraseña (solo editar)</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="id_rol" class="form-label">Rol</label>
+              <select class="form-control" id="id_rol">
+                <option value="">Seleccionar rol...</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input type="tel" inputmode="numeric" pattern="[0-9]+" class="form-control" id="telefono">
+            </div>
+
+            <div class="mb-3">
+              <label for="estado" class="form-label">Estado</label>
+              <select class="form-control" id="estado">
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+            </div>
+
+            <div id="mensajeError" class="alert alert-danger" style="display: none;"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnGuardarUsuario">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="clienteModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Registrar Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="clienteForm">
+            <input type="hidden" id="clienteId">
+            <div class="mb-3">
+              <label for="clienteNombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="clienteNombre" required>
+            </div>
+            <div class="mb-3">
+              <label for="clienteCorreo" class="form-label">Correo</label>
+              <input type="email" class="form-control" id="clienteCorreo" required>
+            </div>
+            <div class="mb-3">
+              <label for="clienteTelefono" class="form-label">Teléfono</label>
+              <input type="tel" inputmode="numeric" pattern="[0-9]+" class="form-control" id="clienteTelefono">
+            </div>
+            <div class="mb-3">
+              <label for="clienteDireccion" class="form-label">Dirección</label>
+              <input type="text" class="form-control" id="clienteDireccion">
+            </div>
+            <div class="mb-3">
+              <label for="clienteEstado" class="form-label">Estado</label>
+              <select class="form-control" id="clienteEstado">
+                <option value="1">Activo</option>
+                <option value="0">Inactivo</option>
+              </select>
+            </div>
+            <div id="clienteError" class="alert alert-danger d-none"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnGuardarCliente">Guardar Cliente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="notifications.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

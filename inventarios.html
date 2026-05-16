@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventarios</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container py-5">
+
+    <div class="row align-items-center mb-4">
+      <div class="col-md-8">
+        <h1 class="hero-title mb-2">Módulo de Inventarios</h1>
+        <p class="hero-text text-muted mb-0">Administra productos y categorías con una interfaz moderna, limpia y fácil de usar.</p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-xl-6">
+        <div class="card section-card shadow-sm p-4 mb-4">
+          <div class="section-heading">
+            <div>
+              <h4 class="card-title mb-1">Nuevo Producto</h4>
+              <p class="text-muted mb-0">Carga los detalles del producto en el inventario.</p>
+            </div>
+          </div>
+
+          <form id="formProducto">
+
+        <input type="text" id="codigo_producto" class="form-control mb-2" placeholder="Código producto">
+
+        <input type="text" id="nombre_producto" class="form-control mb-2" placeholder="Nombre producto">
+
+        <input type="text" id="descripcion" class="form-control mb-2" placeholder="Descripción">
+
+        <input type="number" id="id_categoria" class="form-control mb-2" placeholder="ID Categoría">
+
+        <select id="unidad_medida" class="form-control mb-2">
+          <option value="">Seleccionar unidad...</option>
+          <option value="mg">mg</option>
+          <option value="g">g</option>
+          <option value="kg">kg</option>
+          <option value="ml">ml</option>
+          <option value="l">l</option>
+          <option value="unidad">unidad</option>
+          <option value="paquete">paquete</option>
+          <option value="caja">caja</option>
+        </select>
+
+        <input type="number" id="precio_compra" class="form-control mb-2" placeholder="Precio compra">
+
+        <input type="number" id="precio_venta" class="form-control mb-2" placeholder="Precio venta">
+
+        <input type="number" id="stock_minimo" class="form-control mb-2" placeholder="Stock mínimo">
+
+        <input type="number" id="stock_maximo" class="form-control mb-2" placeholder="Stock máximo">
+
+        <button class="btn btn-primary">
+            Guardar Producto
+        </button>
+
+          </form>
+        </div>
+      </div>
+
+      <div class="col-xl-6">
+        <div class="card section-card shadow-sm p-4 mb-4">
+          <div class="section-heading">
+            <div>
+              <h4 class="card-title mb-1">Manejo de Categorías</h4>
+              <p class="text-muted mb-0">Define categorías para tus productos.</p>
+            </div>
+          </div>
+
+          <form id="formCategoria">
+        <input type="text" id="nombre_categoria" class="form-control mb-2" placeholder="Nombre categoría">
+        <textarea id="descripcion_categoria" class="form-control mb-2" placeholder="Descripción"></textarea>
+        <button class="btn btn-primary">Guardar Categoría</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="card section-card shadow-sm p-4">
+      <div class="section-heading">
+        <h4 class="card-title mb-1">Productos</h4>
+        <span class="text-muted">Lista actual del inventario.</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Compra</th>
+                <th>Venta</th>
+                <th>Stock Mín</th>
+                <th>Stock Máx</th>
+                <th>Categoría</th>
+            </tr>
+          </thead>
+          <tbody id="tablaProductos"></tbody>
+
+      </table>
+      </div>
+    </div>
+    
+    <div class="card section-card shadow-sm p-4 mt-4">
+      <div class="section-heading">
+        <h4 class="card-title mb-1">Inventarios</h4>
+        <span class="text-muted">Registros de inventario por producto.</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Producto</th>
+              <th>Almacén</th>
+              <th>Stock</th>
+              <th>Ubicación</th>
+              <th>Última Actualización</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaInventarios"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+        const form = document.getElementById('formProducto');
+
+        const tabla = document.getElementById('tablaProductos');
+        let productosCache = [];
+
+        async function cargarProductos() {
+
+            const respuesta = await fetch('http://localhost:3000/api/productos');
+
+            const productos = await respuesta.json();
+
+            tabla.innerHTML = '';
+
+            productos.forEach(producto => {
+
+              tabla.innerHTML += `
+                <tr>
+                  <td>${producto.id_producto}</td>
+                  <td>${producto.codigo_producto}</td>
+                  <td>${producto.nombre_producto}</td>
+                  <td>${producto.precio_compra ?? '0'}</td>
+                  <td>${producto.precio_venta ?? '0'}</td>
+                  <td>${producto.stock_minimo ?? '0'}</td>
+                  <td>${producto.stock_maximo ?? '0'}</td>
+                  <td>${producto.id_categoria ?? 'N/A'}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editarProducto(${producto.id_producto})">Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(${producto.id_producto})">Eliminar</button>
+                  </td>
+                </tr>
+              `;
+
+            });
+
+            productosCache = productos;
+
+        }
+
+        form.addEventListener('submit', async (e) => {
+
+            e.preventDefault();
+
+            const producto = {
+                codigo_producto: document.getElementById('codigo_producto').value,
+                nombre_producto: document.getElementById('nombre_producto').value,
+                descripcion: document.getElementById('descripcion').value,
+                id_categoria: document.getElementById('id_categoria').value,
+                unidad_medida: document.getElementById('unidad_medida').value,
+                precio_compra: document.getElementById('precio_compra').value,
+                precio_venta: document.getElementById('precio_venta').value,
+                stock_minimo: document.getElementById('stock_minimo').value,
+                stock_maximo: document.getElementById('stock_maximo').value,
+                estado: 1
+            };
+
+            try {
+                // If editing, use PUT
+                const editingId = form.dataset.editingId;
+                let respuesta;
+                if (editingId) {
+                  respuesta = await fetch(`http://localhost:3000/api/productos/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(producto)
+                  });
+                } else {
+                  respuesta = await fetch('http://localhost:3000/api/productos', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(producto)
+                  });
+                }
+
+                if (!respuesta.ok) {
+                    const errorData = await respuesta.json();
+                    throw new Error(errorData.mensaje || 'Error desconocido');
+                }
+
+                const data = await respuesta.json();
+                alert(data.mensaje);
+                form.reset();
+                delete form.dataset.editingId;
+                cargarProductos();
+            } catch (error) {
+                alert('Error al guardar producto: ' + error.message);
+            }
+
+        });
+
+        cargarProductos();
+
+        const formCategoria = document.getElementById('formCategoria');
+
+        formCategoria.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const nombre_categoria = document.getElementById('nombre_categoria').value;
+          const descripcion = document.getElementById('descripcion_categoria').value;
+          const editingId = formCategoria.dataset.editingId;
+
+          if (!nombre_categoria) return alert('nombre_categoria es requerido');
+
+          try {
+            let respuesta;
+            if (editingId) {
+              respuesta = await fetch(`http://localhost:3000/api/categorias/${editingId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre_categoria, descripcion, estado: 1 })
+              });
+            } else {
+              respuesta = await fetch('http://localhost:3000/api/categorias', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre_categoria, descripcion })
+              });
+            }
+
+            if (!respuesta.ok) {
+              const err = await respuesta.json();
+              throw new Error(err.mensaje || 'Error al guardar categoría');
+            }
+
+            const data = await respuesta.json();
+            alert(data.mensaje || 'Categoría guardada');
+            formCategoria.reset();
+            delete formCategoria.dataset.editingId;
+          } catch (err) {
+            alert('Error al guardar categoría: ' + err.message);
+          }
+        });
+
+        window.editarCategoria = function (id) {
+          // fetch category and fill form
+          fetch(`http://localhost:3000/api/categorias/${id}`).then(r => r.json()).then(cat => {
+            document.getElementById('nombre_categoria').value = cat.nombre_categoria || '';
+            document.getElementById('descripcion_categoria').value = cat.descripcion || '';
+            formCategoria.dataset.editingId = id;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }).catch(err => alert('Error al cargar categoría: ' + err.message));
+        };
+
+        window.eliminarCategoria = async function (id) {
+          if (!confirm('¿Eliminar categoría?')) return;
+          try {
+            const res = await fetch(`http://localhost:3000/api/categorias/${id}`, { method: 'DELETE' });
+            if (res.status === 204) alert('Categoría eliminada');
+            else {
+              const data = await res.json();
+              alert(data.mensaje || 'Error al eliminar categoría');
+            }
+          } catch (err) {
+            alert('Error al eliminar categoría: ' + err.message);
+          }
+        };
+
+        window.editarProducto = function (id) {
+          const producto = productosCache.find(p => p.id_producto === id);
+          if (!producto) return alert('Producto no encontrado');
+
+          document.getElementById('codigo_producto').value = producto.codigo_producto || '';
+          document.getElementById('nombre_producto').value = producto.nombre_producto || '';
+          document.getElementById('descripcion').value = producto.descripcion || '';
+          document.getElementById('id_categoria').value = producto.id_categoria || '';
+          document.getElementById('unidad_medida').value = producto.unidad_medida || '';
+          document.getElementById('precio_compra').value = producto.precio_compra || '';
+          document.getElementById('precio_venta').value = producto.precio_venta || '';
+          document.getElementById('stock_minimo').value = producto.stock_minimo || '';
+          document.getElementById('stock_maximo').value = producto.stock_maximo || '';
+
+          form.dataset.editingId = id;
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.eliminarProducto = async function (id) {
+          if (!confirm('¿Eliminar producto?')) return;
+          try {
+            const res = await fetch(`http://localhost:3000/api/productos/${id}`, { method: 'DELETE' });
+            if (res.status === 204) cargarProductos();
+            else {
+              const data = await res.json();
+              alert(data.mensaje || 'Error al eliminar');
+            }
+          } catch (err) {
+            alert('Error al eliminar: ' + err.message);
+          }
+        }
+
+        // Load inventarios into table
+        const tablaInventarios = document.getElementById('tablaInventarios');
+
+        async function cargarInventarios() {
+            try {
+                const res = await fetch('http://localhost:3000/api/inventarios');
+                if (!res.ok) throw new Error('No se pudo cargar inventarios');
+                const invs = await res.json();
+                tablaInventarios.innerHTML = '';
+                invs.forEach(i => {
+                    const producto = productosCache.find(p => p.id_producto === i.id_producto) || { nombre_producto: i.id_producto };
+                    tablaInventarios.innerHTML += `
+                        <tr>
+                          <td>${i.id_inventario}</td>
+                          <td>${producto.nombre_producto}</td>
+                          <td>${i.id_almacen ?? ''}</td>
+                          <td>${i.stock_actual}</td>
+                          <td>${i.ubicacion ?? ''}</td>
+                          <td>${i.fecha_actualizacion ?? ''}</td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editarInventario(${i.id_inventario})">Editar</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarInventario(${i.id_inventario})">Eliminar</button>
+                          </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                tablaInventarios.innerHTML = '<tr><td colspan="7" class="text-danger">No se pudieron cargar inventarios</td></tr>';
+            }
+        }
+
+        window.editarInventario = async function (id) {
+            try {
+                const res = await fetch(`http://localhost:3000/api/inventarios/${id}`);
+                if (!res.ok) throw new Error('No encontrado');
+                const inv = await res.json();
+                // simple redirect to top form in page
+                alert('Use el formulario de la izquierda en la página principal para editar inventario.');
+            } catch (err) {
+                alert('Error al cargar inventario: ' + err.message);
+            }
+        }
+
+        window.eliminarInventario = async function (id) {
+            if (!confirm('¿Eliminar registro de inventario?')) return;
+            try {
+                const res = await fetch(`http://localhost:3000/api/inventarios/${id}`, { method: 'DELETE' });
+                if (res.status === 204) cargarInventarios();
+                else {
+                    const data = await res.json();
+                    alert(data.mensaje || 'Error al eliminar');
+                }
+            } catch (err) {
+                alert('Error al eliminar inventario: ' + err.message);
+            }
+        }
+
+        // call cargarInventarios after products loaded
+        cargarInventarios();
+
+    </script>
+
+</body>
+</html>
