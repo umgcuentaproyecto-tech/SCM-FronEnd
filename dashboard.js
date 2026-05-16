@@ -2379,6 +2379,9 @@ async function cargarResumenFinanzas() {
     setTextIfExists('totalPagos', formatearMoneda(resumen.total_pagos));
     setTextIfExists('valorInventario', formatearMoneda(resumen.valor_inventario_costo));
     setTextIfExists('margenPotencial', formatearMoneda(resumen.margen_potencial));
+    setTextIfExists('totalCostosDirecto', formatearMoneda(resumen.total_costos_directo || 0));
+    setTextIfExists('totalCostosIndirecto', formatearMoneda(resumen.total_costos_indirecto || 0));
+    setTextIfExists('totalCostosAdministrativo', formatearMoneda(resumen.total_costos_administrativo || 0));
   } catch (error) {
     console.error('Error cargando resumen financiero:', error);
   }
