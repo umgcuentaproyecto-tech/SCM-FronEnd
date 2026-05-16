@@ -48,12 +48,17 @@ document.addEventListener('DOMContentLoaded', async function() {
   cargarVehiculos();
   cargarRutas();
   cargarProveedores();
+  await cargarPagos();
   cargarOrdenes();
   cargarRecepciones();
   cargarCompras();
   cargarResumenFinanzas();
   cargarCostos();
-  cargarPagos();
+
+  const pagoOrdenSelect = document.getElementById('pagoOrden');
+  const pagoProveedorSelect = document.getElementById('pagoProveedor');
+  if (pagoOrdenSelect) pagoOrdenSelect.addEventListener('change', onPagoOrdenChange);
+  if (pagoProveedorSelect) pagoProveedorSelect.addEventListener('change', onPagoProveedorChange);
 
   if (usuarioActual) {
     document.getElementById('usuarioNombre').textContent = usuarioActual.nombre;
@@ -1898,6 +1903,31 @@ window.eliminarProveedor = async function(id) {
   }
 };
 
+function obtenerOrdenesDisponibles() {
+  const pagosPagados = new Set(pagosCache
+    .filter(p => String(p.estado || '').toUpperCase() === 'PAGADO' && p.id_orden_compra)
+    .map(p => Number(p.id_orden_compra))
+  );
+  return ordenesCache.filter(orden => !pagosPagados.has(Number(orden.id)));
+}
+
+function filtrarOrdenesPorProveedor(ordenes, proveedorId) {
+  if (!proveedorId) return ordenes;
+  return ordenes.filter(orden => String(orden.id_proveedor || '') === String(proveedorId));
+}
+
+function actualizarSelectOrdenesDisponibles() {
+  const pagoOrdenSelect = document.getElementById('pagoOrden');
+  if (!pagoOrdenSelect) return;
+  const proveedorId = document.getElementById('pagoProveedor')?.value || '';
+  const ordenesDisponibles = filtrarOrdenesPorProveedor(obtenerOrdenesDisponibles(), proveedorId);
+  if (ordenesDisponibles.length === 0) {
+    pagoOrdenSelect.innerHTML = '<option value="">No hay órdenes disponibles</option>';
+    return;
+  }
+  pagoOrdenSelect.innerHTML = '<option value="">Sin orden específica</option>' + ordenesDisponibles.map(orden => `<option value="${orden.id}">#${orden.id} - ${orden.proveedor || orden.nombre_proveedor || 'Proveedor'} - Q${Number(orden.total || 0).toFixed(2)}</option>`).join('');
+}
+
 async function cargarOrdenes() {
   try {
     const ordenes = await apiCall('GET', API_CONFIG.endpoints.ordenes);
@@ -1926,13 +1956,60 @@ async function cargarOrdenes() {
       `).join('');
     }
     if (pagoOrdenSelect) {
-      pagoOrdenSelect.innerHTML = '<option value="">Sin orden específica</option>' + ordenesCache.map(orden => `<option value="${orden.id}">#${orden.id} - ${orden.proveedor || orden.nombre_proveedor || 'Proveedor'} - Q${Number(orden.total || 0).toFixed(2)}</option>`).join('');
+      actualizarSelectOrdenesDisponibles();
     }
   } catch (error) {
     console.error('Error cargando órdenes:', error);
     const tbody = document.getElementById('ordenesTable');
     if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error cargando órdenes</td></tr>';
   }
+}
+
+function onPagoProveedorChange() {
+  actualizarSelectOrdenesDisponibles();
+}
+
+function actualizarBloqueoCamposPago() {
+  const pagoOrdenSelect = document.getElementById('pagoOrden');
+  const pagoProveedorSelect = document.getElementById('pagoProveedor');
+  const montoInput = document.getElementById('monto_pagado');
+  const ordenId = pagoOrdenSelect?.value;
+  const bloqueado = Boolean(ordenId);
+
+  if (pagoProveedorSelect) {
+    pagoProveedorSelect.disabled = bloqueado;
+  }
+  if (montoInput) {
+    montoInput.readOnly = bloqueado;
+    montoInput.classList.toggle('bg-light', bloqueado);
+  }
+}
+
+function onPagoOrdenChange() {
+  const pagoOrdenSelect = document.getElementById('pagoOrden');
+  if (!pagoOrdenSelect) return;
+  const ordenId = pagoOrdenSelect.value;
+
+  if (!ordenId) {
+    actualizarBloqueoCamposPago();
+    return;
+  }
+
+  const orden = ordenesCache.find(item => String(item.id) === String(ordenId));
+  if (!orden) {
+    actualizarBloqueoCamposPago();
+    return;
+  }
+
+  const proveedorSelect = document.getElementById('pagoProveedor');
+  if (proveedorSelect && orden.id_proveedor) {
+    proveedorSelect.value = orden.id_proveedor;
+  }
+
+  const montoInput = document.getElementById('monto_pagado');
+  if (montoInput) montoInput.value = Number(orden.total || 0).toFixed(2);
+
+  actualizarBloqueoCamposPago();
 }
 
 async function guardarOrden(event) {
@@ -2394,8 +2471,10 @@ async function guardarCosto(event) {
   const form = event.target;
   const editingId = form.dataset.editingId;
   const usuario = Auth.getUsuario();
+  const tipoCostoValor = String(document.getElementById('tipo_costo').value || '').trim().toUpperCase();
+  const tiposPermitidos = ['DIRECTO', 'INDIRECTO', 'OPERATIVO', 'ADMINISTRATIVO'];
   const costo = {
-    tipo_costo: document.getElementById('tipo_costo').value,
+    tipo_costo: tipoCostoValor,
     descripcion: document.getElementById('descripcion_costo').value.trim(),
     monto: Number(document.getElementById('monto_costo').value || 0),
     id_usuario: usuario?.id_usuario || null,
@@ -2404,6 +2483,10 @@ async function guardarCosto(event) {
 
   if (!costo.tipo_costo || !costo.descripcion || costo.monto <= 0) {
     alert('Tipo, descripción y monto son requeridos');
+    return;
+  }
+  if (!tiposPermitidos.includes(costo.tipo_costo)) {
+    alert('Tipo de costo inválido. Selecciona Directo, Indirecto, Operativo o Administrativo.');
     return;
   }
 
@@ -2469,7 +2552,9 @@ async function cargarPagos() {
       return;
     }
 
-    tbody.innerHTML = pagosCache.map(pago => `
+    tbody.innerHTML = pagosCache.map(pago => {
+      const pagado = String(pago.estado || '').toUpperCase() === 'PAGADO';
+      return `
       <tr>
         <td>${pago.id_pago}</td>
         <td>${pago.proveedor_nombre || pago.id_proveedor || '-'}</td>
@@ -2478,11 +2563,12 @@ async function cargarPagos() {
         <td>${pago.metodo_pago || '-'}</td>
         <td><span class="badge ${getPagoBadge(pago.estado)}">${pago.estado || 'PENDIENTE'}</span></td>
         <td>
-          <button class="btn btn-sm btn-warning me-1" onclick="editarPago(${pago.id_pago})">Editar</button>
+          <button class="btn btn-sm btn-warning me-1" onclick="editarPago(${pago.id_pago})" ${pagado ? 'disabled title="Pago pagado no editable"' : ''}>Editar</button>
           <button class="btn btn-sm btn-danger" onclick="eliminarPago(${pago.id_pago})">Eliminar</button>
         </td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
   } catch (error) {
     console.error('Error cargando pagos:', error);
     tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error cargando pagos</td></tr>';
@@ -2507,6 +2593,14 @@ async function guardarPago(event) {
     return;
   }
 
+  if (editingId) {
+    const pagoExistente = pagosCache.find(item => String(item.id_pago) === String(editingId));
+    if (pagoExistente && String(pagoExistente.estado || '').toUpperCase() === 'PAGADO') {
+      alert('No se puede editar un pago que ya está marcado como PAGADO.');
+      return;
+    }
+  }
+
   try {
     if (editingId) {
       await apiCall('PUT', `${API_CONFIG.endpoints.pagos}/${editingId}`, pago);
@@ -2515,9 +2609,10 @@ async function guardarPago(event) {
     }
     form.reset();
     delete form.dataset.editingId;
+    actualizarBloqueoCamposPago();
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) submitButton.textContent = 'Guardar Pago';
-    await Promise.all([cargarPagos(), cargarResumenFinanzas()]);
+    await Promise.all([cargarPagos(), cargarResumenFinanzas(), cargarOrdenes()]);
     alert(editingId ? 'Pago actualizado correctamente' : 'Pago guardado correctamente');
   } catch (error) {
     alert('Error guardando pago: ' + error.message);
@@ -2531,15 +2626,22 @@ window.editarPago = function(id) {
     return;
   }
 
+  if (String(pago.estado || '').toUpperCase() === 'PAGADO') {
+    alert('Este pago ya está marcado como PAGADO y no se puede editar.');
+    return;
+  }
+
   const form = document.getElementById('formPago');
   if (!form) return;
 
   document.getElementById('pagoProveedor').value = pago.id_proveedor || '';
+  actualizarSelectOrdenesDisponibles();
   document.getElementById('pagoOrden').value = pago.id_orden_compra || '';
   document.getElementById('monto_pagado').value = pago.monto_pagado ?? '';
   document.getElementById('metodo_pago').value = pago.metodo_pago || '';
   document.getElementById('estado_pago').value = pago.estado || 'PENDIENTE';
   form.dataset.editingId = id;
+  actualizarBloqueoCamposPago();
 
   const submitButton = form.querySelector('button[type="submit"]');
   if (submitButton) submitButton.textContent = 'Actualizar Pago';
@@ -2551,7 +2653,7 @@ window.eliminarPago = async function(id) {
 
   try {
     await apiCall('DELETE', `${API_CONFIG.endpoints.pagos}/${id}`);
-    await Promise.all([cargarPagos(), cargarResumenFinanzas()]);
+    await Promise.all([cargarPagos(), cargarResumenFinanzas(), cargarOrdenes()]);
   } catch (error) {
     alert('Error eliminando pago: ' + error.message);
   }
